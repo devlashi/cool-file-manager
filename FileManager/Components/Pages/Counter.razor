@@ -1,0 +1,57 @@
+﻿@page "/counter"
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+@if(isLoading){
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else{
+    @foreach (var c in Containers)
+    {
+        <MudCardContent>@c.Name</MudCardContent>
+        <MudDivider></MudDivider>
+    }
+    <MudInput type="text" @bind-value="inputstring" />
+    <MudContainer>
+        <MudButton class="btn btn-primary" @onclick="AddDataAsync">Add</MudButton>
+    </MudContainer>
+
+}
+
+
+
+
+
+
+@using FileManager.Data.Entities
+@inject AppDbContext DbContext
+@code {
+    private int currentCount = 0;
+    private string inputstring = "";
+    private List<Container> Containers = [];
+    private bool isLoading = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(1000);
+        Containers = DbContext.Containers.ToList();
+        isLoading = false;
+    }
+
+    private async Task AddDataAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+        Container container = new()
+            {
+                Name = inputstring
+            };
+        DbContext.Add(container);
+        await DbContext.SaveChangesAsync();
+        Containers.Add(container);
+        isLoading = false;
+    }
+}
